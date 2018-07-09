@@ -29,11 +29,6 @@ public class ConcurrentMapPerformanceTest {
 
 
     @Benchmark
-    public void synchronizedMap_put_get(Data data) throws Exception {
-        avoidEliminatingAndAssert(data, data.synchronizedMap, this::putAndGet);
-    }
-
-    @Benchmark
     public void concurrentHashMap_put_get(Data data) throws Exception {
         avoidEliminatingAndAssert(data, data.concurrentHashMap, this::putAndGet);
     }
