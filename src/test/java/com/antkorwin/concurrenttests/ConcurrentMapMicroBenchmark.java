@@ -13,6 +13,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.IntStream;
 
 /**
@@ -28,7 +29,7 @@ public class ConcurrentMapMicroBenchmark {
 
     @Benchmark
     @OperationsPerInvocation(NUMBER_OF_KEYS)
-    public void right_ConcurrentHashMap(Data data, Blackhole bh) {
+    public void compute_ConcurrentHashMap(Data data, Blackhole bh) {
         for (int i = 0; i < NUMBER_OF_KEYS; i++) {
             bh.consume(data.concurrentHashMap.compute(data.keys[i], computeFunc(data)));
         }
@@ -36,7 +37,7 @@ public class ConcurrentMapMicroBenchmark {
 
     @Benchmark
     @OperationsPerInvocation(NUMBER_OF_KEYS)
-    public void right_ConcurrentReferenceHashMap(Data data, Blackhole bh) {
+    public void compute_ConcurrentReferenceHashMap(Data data, Blackhole bh) {
         for (int i = 0; i < NUMBER_OF_KEYS; i++) {
             bh.consume(data.concurrentReferenceHashMap.compute(data.keys[i], computeFunc(data)));
         }
@@ -44,15 +45,29 @@ public class ConcurrentMapMicroBenchmark {
 
     @Benchmark
     @OperationsPerInvocation(NUMBER_OF_KEYS)
-    public void right_SynchronizedMap(Data data, Blackhole bh) {
+    public void compute_SynchronizedMap(Data data, Blackhole bh) {
         for (int i = 0; i < NUMBER_OF_KEYS; i++) {
             bh.consume(data.synchronizedMap.compute(data.keys[i], computeFunc(data)));
         }
     }
 
+    @Benchmark
+    @OperationsPerInvocation(NUMBER_OF_KEYS)
+    public void computeIfAbsent_ConcurrentHashMap(Data data, Blackhole bh) {
+        for (int i = 0; i < NUMBER_OF_KEYS; i++) {
+            bh.consume(data.concurrentHashMap.computeIfAbsent(data.keys[i], computeIfAbsentFunc(data)));
+        }
+    }
+
+
     private BiFunction<UUID, Integer, Integer> computeFunc(Data data) {
         return (k, v) -> (v == null) ? data.random.nextInt(NUMBER_OF_KEYS) : v;
     }
+
+    private Function<? super UUID, ? extends Integer> computeIfAbsentFunc(Data data) {
+        return k -> data.random.nextInt(NUMBER_OF_KEYS);
+    }
+
 
     @Test
     public void launchBenchmark() throws Exception {
